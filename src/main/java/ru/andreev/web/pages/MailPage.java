@@ -1,18 +1,18 @@
 package ru.andreev.web.pages;
 
 import com.codeborne.selenide.Selenide;
-import com.codeborne.selenide.SelenideElement;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.codeborne.selenide.CollectionCondition.allMatch;
-import static com.codeborne.selenide.CollectionCondition.size;
-import static com.codeborne.selenide.Condition.exist;
+import static com.codeborne.selenide.CollectionCondition.sizeGreaterThan;
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
 
@@ -47,26 +47,27 @@ public class MailPage {
         return this;
     }
 
-    //rates-item-usd
     public String getRates(String curr) {
         return $(By.xpath(String.format(aXpathByTestId, ratesIdElements.get(curr))))
-                .should(exist)
+                .should(visible)
                 .getText();
     }
 
     public MailPage goToTab(String tab) {
         $(By.xpath(String.format(aXpathByTestId, tabIdElements.get(tab))))
-                .should(exist)
+                .should(visible)
                 .click();
         return this;
     }
 
     public List<String> getNewsTitle() {
-        List<SelenideElement> newsTitleElements = $$(By.xpath(String.format(allXpathByTestId, "news-item-title")))
-                .should(size(15))
-                .should(allMatch("Не все элементы отображены на странице.", WebElement::isDisplayed));
-        return newsTitleElements.stream()
-                .map(SelenideElement::getText)
-                .toList();
+        int countTitle = $$(By.xpath(String.format(allXpathByTestId, "news-item-title")))
+                .should(sizeGreaterThan(0))
+                .should(allMatch("Не все элементы отображены на странице.", WebElement::isDisplayed)).size();
+        List<String> newsTitle = new ArrayList<>();
+        for (int i = 0; i < countTitle; i++) {
+            newsTitle.add($$(By.xpath(String.format(allXpathByTestId, "news-item-title"))).get(i).getText());
+        }
+        return newsTitle;
     }
 }
